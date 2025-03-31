@@ -89,9 +89,32 @@ class API {
         }
     }
 
+    // Added loadConfig method
+    async loadConfig() {
+        try {
+            console.log('Загрузка конфигурации приложения (config.json)...');
+            const response = await fetch('config.json');
+            if (!response.ok) {
+                throw new Error(`Не удалось загрузить config.json: статус ${response.status}`);
+            }
+            const config = await response.json();
+            console.log('Конфигурация успешно загружена:', config);
+            // Basic validation
+            if (!config || !Array.isArray(config.psychologists)) {
+                 throw new Error('Некорректный формат config.json: отсутствует массив psychologists.');
+            }
+            return config;
+        } catch (error) {
+            console.error('Ошибка загрузки конфигурации:', error);
+            // Re-throw the error so the caller (app.js) can handle it
+            throw new Error(`Ошибка загрузки config.json: ${error.message}`);
+        }
+    }
+
+
     async testConnection() {
         try {
-            console.log('Тестирование подключения к серверу модели...');
+            console.log('Тестирование подключения к серверу модели...'); // Note: This tests the Gemini API, not config loading.
             const messages = [
                 {
                     role: "system",

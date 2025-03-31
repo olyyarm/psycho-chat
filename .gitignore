@@ -1,0 +1,16 @@
+node_modules/
+.DS_Store
+assets/images/psychologists/*
+!assets/images/psychologists/.keep
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+Thumbs.db
+.DS_Store
+.directory
+desktop.ini

@@ -167,18 +167,27 @@ class API {
 
             if (error.message.includes('Failed to fetch')) {
                 userMessage += 'Сервер модели недоступен. Убедитесь, что он запущен на localhost:1234';
-            } else if (error.message.includes('messages')) {
-                userMessage += 'Ошибка в формате сообщения. Попробуйте еще раз';
+            } else if (error.message.includes('API Gemini')) {
+                 // Ошибки, которые мы сами сгенерировали на основе ответа API
+                 userMessage += error.message;
+            } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+                 userMessage += 'Проблема с сетью или CORS. Проверьте подключение и настройки сервера.';
             } else {
-                userMessage += error.message;
+                 // Другие общие ошибки
+                 userMessage += `Неизвестная ошибка: ${error.message}`;
             }
 
+            // Перебрасываем ошибку с user-friendly сообщением
             throw new Error(userMessage);
         }
     }
 }
 
-// Экспортируем API
-window.APIClass = API;
-// Создаем экземпляр API
-window.api = new API();
+// Инициализация API при загрузке скрипта
+if (!window.api) {
+    console.log('Создание экземпляра API...');
+    window.api = new API();
+    console.log('Экземпляр API создан и доступен как window.api');
+} else {
+    console.log('Экземпляр API уже существует.');
+}

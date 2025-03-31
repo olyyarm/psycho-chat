@@ -1,7 +1,5 @@
 node_modules/
 .DS_Store
-assets/images/psychologists/*
-!assets/images/psychologists/.keep
 
 # IDE files
 .idea/

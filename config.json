@@ -27,63 +27,63 @@
       "name": "Карен Хорни",
       "title": "Неофрейдизм",
       "image": "assets/images/psychologists/horney.png",
-      "active": false
+      "active": true
     },
     {
       "id": "erikson",
       "name": "Эрик Эриксон",
       "title": "Эго-психология",
       "image": "assets/images/psychologists/erikson.png",
-      "active": false
+      "active": true
     },
     {
       "id": "maslow",
       "name": "Абрахам Маслоу",
       "title": "Гуманистическая психология",
       "image": "assets/images/psychologists/maslow.png",
-      "active": false
+      "active": true
     },
     {
       "id": "rogers",
       "name": "Карл Роджерс",
       "title": "Клиент-центрированная терапия",
       "image": "assets/images/psychologists/rogers.png",
-      "active": false
+      "active": true
     },
     {
       "id": "frankl",
       "name": "Виктор Франкл",
       "title": "Логотерапия",
       "image": "assets/images/psychologists/frankl.png",
-      "active": false
+      "active": true
     },
     {
       "id": "perls",
       "name": "Фриц Перлз",
       "title": "Гештальт-терапия",
       "image": "assets/images/psychologists/perls.png",
-      "active": false
+      "active": true
     },
     {
       "id": "behaviorism",
       "name": "Уотсон и Скиннер",
       "title": "Бихевиоризм",
       "image": "assets/images/psychologists/behaviorism.png",
-      "active": false
+      "active": true
     },
     {
       "id": "beck",
       "name": "Аарон Бек",
       "title": "Когнитивная терапия",
       "image": "assets/images/psychologists/beck.png",
-      "active": false
+      "active": true
     },
     {
       "id": "berne",
       "name": "Эрик Берн",
       "title": "Транзактный анализ",
       "image": "assets/images/psychologists/berne.png",
-      "active": false
+      "active": true
     }
   ]
 }

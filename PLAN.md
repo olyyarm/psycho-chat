@@ -1,43 +1,15 @@
-# План действий по проверке и отправке кода psycho-chat на GitHub
+## План добавления психолога "motivator"
 
-## 1. Анализ
-
-*   **Проект:** `psycho-chat` - веб-приложение для чата с AI-психологами через Google Gemini API (HTML, CSS, JavaScript).
-*   **Git:** Локальный репозиторий связан с GitHub (`https://github.com/olyyarm/psycho-chat.git`).
-
-## 2. Обнаруженные проблемы
-
-*   **Критическая проблема безопасности:** API-ключ находится в `psycho-chat/config.json`, и этот файл **не игнорируется** Git (`.gitignore`). **Риск утечки ключа при `git push`!**
-*   **Качество кода:** В `psycho-chat/scripts/app.js` и `psycho-chat/scripts/api.js` присутствует отладочный код (`debugger;`, избыточные `console.log`, TODO), который нужно убрать перед публикацией.
-
-## 3. План Решения
-
-```mermaid
-graph TD
-    A[Начало] --> B{Проверка .gitignore};
-    B -- | config.json отсутствует | --> C[Добавить config.json в .gitignore];
-    C --> D{Проверка app.js};
-    D -- | Найдены debugger; | --> E[Удалить debugger; из app.js];
-    E --> F{Проверка app.js/api.js};
-    D -- | debugger; отсутствуют | --> F;
-    F -- | Найдены избыточные console.log/TODO | --> G[Очистить console.log/TODO в app.js/api.js];
-    G --> H{Подготовка к Git Push};
-    F -- | Код чистый | --> H;
-    H --> I[git add .];
-    I --> J[git commit -m "Clean up code and secure API key"];
-    J --> K[git push origin main];
-    K --> L[Завершение];
-```
-
-*   **Шаг 1: Обеспечить безопасность API ключа (Немедленно!)**
-    *   Добавить строку `config.json` в файл `psycho-chat/.gitignore`.
-*   **Шаг 2: Очистить JavaScript код**
-    *   Удалить `debugger;` из `psycho-chat/scripts/app.js`.
-    *   Просмотреть и удалить/доработать закомментированные участки и TODO в `psycho-chat/scripts/app.js`.
-    *   Уменьшить количество `console.log` в `psycho-chat/scripts/app.js` и `psycho-chat/scripts/api.js`.
-*   **Шаг 3: Отправить изменения на GitHub**
-    *   Выполнить команды `git add`, `git commit` и `git push` для сохранения и отправки безопасного и очищенного кода.
-
-## 4. Следующий шаг
-
-*   Переключиться в режим "Code" для внесения изменений в файлы (`.gitignore`, `app.js`, `api.js`).
+1.  **Прочитать содержимое файлов:**
+    *   `psycho-chat/config.json`: чтобы понять, как добавлять нового психолога в список.
+    *   `psycho-chat/prompts/psy_terms.json`: чтобы посмотреть структуру файла с системными промптами.
+    *   `psycho-chat/scripts/app.js`: чтобы понять, как создаются карточки психологов.
+2.  **Добавить системный промпт:**
+    *   Прочитать содержимое `psycho-chat/prompts/motivator_psy_terms.json`.
+    *   Добавить содержимое `motivator_psy_terms.json` в `psycho-chat/prompts/psy_terms.json`.
+3.  **Создать карточку психолога:**
+    *   Добавить код для создания карточки "motivator" в `psycho-chat/scripts/app.js`, используя примеры существующих карточек.
+4.  **Добавить психолога в список:**
+    *   Добавить "motivator" в список психологов в `psycho-chat/config.json`.
+5.  **Проверить изменения:**
+    *   Убедиться, что новый психолог отображается в приложении и работает корректно.

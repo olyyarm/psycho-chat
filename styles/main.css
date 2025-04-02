@@ -728,3 +728,270 @@ img {
   background: none;
   mix-blend-mode: normal;
 }
+
+@media (max-width: 768px) {
+  /* --- Стили для главной страницы (index.html) на мобильных --- */
+
+  /* Убираем отступы у body, чтобы контент занимал всю ширину */
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Делаем основной контейнер без лишних отступов */
+  .content-wrapper {
+    margin: 0;
+    padding: 20px; /* Небольшой внутренний отступ */
+    border-radius: 0; /* Убираем скругление */
+    min-height: 100vh; /* Занимаем весь экран по высоте */
+  }
+
+  /* Ставим блоки .hero друг под другом */
+  .hero {
+    grid-template-columns: 1fr; /* Один столбец */
+    gap: 20px; /* Уменьшаем отступ между блоками */
+    min-height: auto; /* Высота по контенту */
+    padding: 0; /* Убираем внутренний отступ, если он был */
+  }
+
+  /* Текстовый блок занимает всю ширину */
+  .hero-text {
+    padding: 0 10px; /* Небольшие боковые отступы */
+    width: 100%;
+    text-align: center; /* Можно центрировать текст для мобильных */
+  }
+
+  .hero-text h1 {
+    font-size: 2em; /* Уменьшаем заголовок */
+  }
+
+  .hero-text p {
+    max-width: 100%; /* Текст занимает всю доступную ширину */
+    font-size: 1em;
+  }
+
+  /* Блок с карточками тоже на всю ширину */
+  .hero-cards {
+    padding-right: 0; /* Убираем правый отступ */
+    width: 100%; /* Занимает всю ширину */
+    overflow: hidden; /* Предотвращаем случайный горизонтальный скролл страницы */
+  }
+
+  /* Контейнер с карточками */
+  .cards-wrapper {
+    padding: 10px 0; /* Уменьшаем вертикальные отступы */
+    /* Убедимся, что горизонтальный скролл работает */
+    overflow-x: auto;
+    /* Добавляем немного пространства слева/справа для удобства скролла */
+    padding-left: 15px;
+    padding-right: 15px;
+    /* Центрирование карточек может быть не нужно, если скролл */
+     /* justify-content: flex-start; */ /* Выравнивание по началу */
+     gap: 15px; /* Уменьшаем расстояние между карточками */
+  }
+
+  /* --- Стили для страницы чата (chat.html) на мобильных --- */
+
+  /* Убираем жесткую высоту и overflow у body для чата */
+  body.chat-page {
+    min-height: 100vh; /* Минимальная высота */
+    height: auto; /* Высота по контенту */
+    overflow-x: hidden;
+    overflow-y: auto; /* Разрешаем скролл страницы, если нужно */
+    padding: 0; /* Убираем отступы */
+    display: flex; /* Используем flex для body */
+    flex-direction: column; /* Основное направление - колонка */
+  }
+
+  /* Контейнер чата занимает все доступное пространство */
+  .chat-page .container {
+    flex-direction: column; /* Панель и чат друг под другом */
+    height: auto; /* Высота по контенту */
+    min-height: 100vh; /* Минимальная высота для заполнения экрана */
+    overflow: visible; /* Убираем скрытие overflow */
+    padding: 10px; /* Уменьшаем отступы */
+    gap: 10px; /* Уменьшаем отступ между панелью и чатом */
+    width: 100%; /* На всю ширину */
+    max-width: 100%; /* Убираем ограничение */
+    flex-grow: 1; /* Позволяем контейнеру расти */
+    display: flex; /* Используем flex */
+  }
+
+  /* Панель психологов */
+  .psychologists-panel {
+    width: 100%; /* На всю ширину */
+    flex-shrink: 0; /* Не сжимается */
+    order: -1; /* Можно поднять панель наверх */
+    padding: 10px;
+    max-height: none; /* Убираем ограничение по высоте, если было */
+    overflow-y: visible; /* Убираем внутренний скролл, если не нужен */
+    position: static; /* Убираем позиционирование, если было */
+    /* Если психологов много, можно сделать горизонтальный скролл выбора */
+    /* display: flex; flex-direction: row; overflow-x: auto; align-items: center; */
+  }
+
+  /* Уменьшаем аватарки и текст в панели */
+  .psychologist-display img {
+    width: 40px;
+    height: 40px;
+  }
+  .psychologist-info h1 {
+    font-size: 14px;
+  }
+  .psychologist-info p {
+    font-size: 12px;
+  }
+  .current-psychologists {
+     flex-direction: row; /* Можно в ряд */
+     flex-wrap: wrap; /* Перенос, если не помещаются */
+     justify-content: center; /* Центрировать */
+  }
+
+   /* Кнопка "Добавить" */
+  .add-psychologist-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  /* Список выбора психологов */
+  .psychologists-list {
+      max-height: 200px; /* Ограничиваем высоту списка */
+      overflow-y: auto;
+  }
+
+  /* Основная область чата */
+  .chat-main {
+    width: 100%; /* На всю ширину */
+    flex-grow: 1; /* Занимает оставшееся место */
+    display: flex; /* Используем flex */
+    flex-direction: column; /* Сообщения и ввод друг под другом */
+    overflow: hidden; /* Оставляем здесь, чтобы скролл был внутри */
+    border-radius: 16px; /* Можно оставить или убрать */
+    /* min-height: calc(100vh - 200px); /* Примерная минимальная высота */
+  }
+
+  /* Одиночный режим */
+  .single-chat-mode {
+    flex-grow: 1; /* Занимает место */
+    display: flex;
+    flex-direction: column;
+    position: static; /* Убираем абсолютное позиционирование */
+    height: auto; /* Убираем фиксированную высоту */
+    overflow: hidden; /* Чтобы скролл был в .chat-messages */
+  }
+
+  .chat-messages {
+    flex-grow: 1; /* Занимает все доступное место */
+    overflow-y: auto; /* Здесь будет скролл */
+    position: static; /* Убираем абсолютное позиционирование */
+    padding: 10px;
+    bottom: auto; /* Убираем отступ снизу */
+  }
+
+   /* Уменьшаем сообщения */
+  .message {
+      padding: 8px 12px;
+      font-size: 14px;
+      max-width: 85%; /* Чуть меньше максимальная ширина */
+      margin-bottom: 6px;
+  }
+  .user-message { margin-left: 15%; }
+  .psychologist-message { margin-right: 15%; }
+
+  /* Поле ввода */
+  .chat-input-wrapper {
+    position: sticky; /* Делаем поле ввода "липким" к низу */
+    bottom: 0;      /* Прилипает к низу .chat-main */
+    flex-shrink: 0; /* Не сжимается */
+    padding: 10px;
+    background: #1C1C1E; /* Фон, чтобы контент под ним не просвечивал */
+    z-index: 100; /* Поверх сообщений */
+    width: 100%; /* Важно для sticky */
+    border-top: 1px solid rgba(255, 255, 255, 0.05); /* Разделитель */
+  }
+
+  .chat-input {
+    padding: 10px; /* Уменьшаем отступы */
+    gap: 10px;
+  }
+
+  .chat-input textarea {
+    font-size: 14px;
+    padding: 8px 10px;
+    min-height: 38px; /* Уменьшаем высоту */
+    max-height: 100px; /* Ограничиваем максимальную */
+  }
+
+  .send-button {
+    padding: 8px 16px; /* Уменьшаем кнопку */
+    font-size: 14px;
+  }
+
+  /* Режим двойного чата */
+  .dual-chat-mode {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: auto;
+      overflow: hidden; /* Для скролла колонок */
+  }
+
+  .dual-chat-mode .chat-columns {
+      grid-template-columns: 1fr; /* Колонки друг под другом */
+      gap: 10px;
+      padding: 10px;
+      height: auto; /* Высота по контенту */
+      overflow: visible; /* Убираем overflow */
+      flex-grow: 1; /* Занимают доступное место */
+      display: flex; /* Используем flex для вертикального расположения */
+      flex-direction: column;
+  }
+
+  .dual-chat-mode .chat-column {
+      height: auto; /* Авто высота */
+      min-height: 250px; /* Минимальная высота колонки */
+      overflow: hidden; /* Чтобы скролл был внутри .chat-messages-column */
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1; /* Позволяем колонкам расти */
+  }
+
+   /* Уменьшаем шапку в колонке */
+  .dual-chat-mode .psychologist-header {
+    padding: 8px 10px;
+  }
+  .dual-chat-mode .psychologist-header img {
+     width: 30px;
+     height: 30px;
+  }
+  .dual-chat-mode .psychologist-header h3 {
+    font-size: 14px;
+  }
+  .dual-chat-mode .psychologist-header p {
+    font-size: 12px;
+  }
+
+  /* Скроллящаяся область сообщений в колонке */
+  .dual-chat-mode .chat-messages-column {
+    flex-grow: 1; /* Занимает доступное место */
+    overflow-y: auto; /* Скролл */
+    padding: 8px;
+    height: auto; /* Убираем фиксированную высоту */
+  }
+
+  /* Кнопка "назад" и контролы */
+  .back-button {
+      padding: 8px 16px;
+      font-size: 14px;
+  }
+  .chat-controls {
+      position: static; /* Убираем абсолютное позиционирование */
+      margin: 10px auto; /* Ставим по центру */
+      padding: 5px;
+      background: none; /* Убираем фон */
+  }
+  .highlight-toggle {
+      font-size: 12px;
+      padding: 5px 10px;
+  }
+}

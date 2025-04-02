@@ -200,11 +200,74 @@
 
 @media (max-width: 768px) {
     .psych-card {
-        width: 280px;
-        min-height: 500px;
+        width: 250px; /* Слегка уменьшаем ширину карточки */
+        height: 450px; /* Значительно уменьшаем высоту карточки */
+        /* min-height убираем, так как задаем жесткую высоту */
+        transform: scale(1); /* Убираем начальное уменьшение */
+        opacity: 1; /* Делаем все карточки видимыми */
+        flex-shrink: 0; /* Важно для корректного скролла */
     }
-    
+
+    /* Убираем эффекты увеличения при наведении на мобильных (они не работают) */
+    .psych-card:hover {
+        transform: scale(1);
+        opacity: 1;
+        z-index: 1;
+    }
+    .psych-card:hover img {
+      transform: scale(1);
+    }
+    .psych-card:hover .card-content {
+      padding-bottom: 30px; /* Возвращаем стандартный отступ */
+    }
+    .psych-card:hover h3,
+    .psych-card:hover h4,
+    .psych-card:hover p,
+    .btn-learn:hover {
+       transform: none; /* Убираем сдвиги при наведении */
+    }
+    .btn-learn:hover {
+        background-color: transparent; /* Убираем изменение фона кнопки */
+        color: #fff;
+        box-shadow: none;
+    }
+
+
     .card-content {
-        padding: 15px;
+        padding: 20px; /* Уменьшаем внутренние отступы контента */
+    }
+
+    .psych-card h3 {
+        font-size: 24px; /* Уменьшаем шрифт заголовка */
+    }
+
+    .psych-card h4 {
+        font-size: 16px; /* Уменьшаем шрифт подзаголовка */
+    }
+
+    .psych-card p {
+        font-size: 14px; /* Уменьшаем шрифт описания */
+        margin-bottom: 16px; /* Уменьшаем отступ */
+        line-height: 1.5;
+    }
+
+    .btn-learn {
+        padding: 10px 20px; /* Уменьшаем кнопку */
+        font-size: 14px;
+    }
+
+    /* Убираем эффекты соседних карточек при наведении */
+    .psych-card:hover + .psych-card,
+    .psych-card:hover ~ .psych-card {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Карусель занимает всю ширину */
+    .carousel {
+        width: 100%;
+        padding: 20px 0; /* Уменьшаем вертикальные отступы */
+        gap: 15px; /* Уменьшаем расстояние */
+        margin-left: 0;
     }
 }

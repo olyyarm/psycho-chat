@@ -5,11 +5,12 @@ class API {
         this.headers = {
             'Content-Type': 'application/json',
         };
-        this.apiKey = 'AIzaSyCfWJ5Z60bLAJGzqurcGbGp8t9uImAEnV0';
-        this.baseUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`;
+        this.apiKey = null; // Will be loaded from config
+        // Base URL will be constructed in makeRequest using the loaded apiKey
     }
 
-    validateMessages(messages) {
+    // Validates the structure expected by getAIResponse before conversion
+    validateInternalMessages(messages) {
         if (!Array.isArray(messages)) {
             throw new Error('Messages должен быть массивом');
         }
@@ -30,43 +31,91 @@ class API {
         return true;
     }
 
+    // Receives messages in the internal format [{role: 'system', content: '...'}, {role: 'user', content: '...'}]
     async makeRequest(messages) {
+        if (!this.apiKey) {
+            throw new Error("API key not loaded. Make sure loadConfig() was called successfully.");
+        }
+
+        // Convert internal message format to Gemini's format
+        const geminiContents = messages.map(msg => {
+            let role = msg.role === 'assistant' ? 'model' : 'user';
+            if (msg.role === 'system' && messages.length > 1 && messages[1].role === 'user') {
+                 return null;
+            }
+            return {
+                role: role,
+                parts: [{ text: msg.content }]
+            };
+        }).filter(Boolean);
+
+        // Prepend system prompt to the first user message if it exists
+        const systemMessage = messages.find(msg => msg.role === 'system');
+        if (systemMessage && geminiContents.length > 0 && geminiContents[0].role === 'user') {
+            geminiContents[0].parts[0].text = `${systemMessage.content}\n\n${geminiContents[0].parts[0].text}`;
+        }
+
+
         const requestBody = {
-            contents: [{
-                parts: [{ text: messages.join('\n') }]
-            }]
+            contents: geminiContents
+            // Add generationConfig if needed
         };
 
         try {
-            this.validateMessages(messages);
-            console.log('Отправка запроса:', JSON.stringify(requestBody, null, 2));
+            // console.log('Отправка запроса Gemini:', JSON.stringify(requestBody, null, 2)); // Removed for cleaner logs
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`;
 
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${this.apiKey}`, {
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: this.headers,
                 body: JSON.stringify(requestBody)
             });
 
             const responseText = await response.text();
-            console.log('Получен ответ:', responseText);
+            // console.log('Получен ответ Gemini:', responseText); // Removed for cleaner logs
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} - ${responseText}`);
+                 let errorMsg = `HTTP error! status: ${response.status}`;
+                 try {
+                     const errorData = JSON.parse(responseText);
+                     if (errorData.error && errorData.error.message) {
+                         errorMsg += ` - ${errorData.error.message}`;
+                     } else {
+                         errorMsg += ` - ${responseText}`;
+                     }
+                 } catch (parseError) {
+                     errorMsg += ` - ${responseText}`;
+                 }
+                 throw new Error(errorMsg);
             }
 
             const data = JSON.parse(responseText);
-            return data;
+            // console.log('Распарсенный ответ Gemini:', JSON.stringify(data, null, 2)); // Removed for cleaner logs
+
+            // Check for Gemini-specific errors in the response body
+            if (data.error) {
+                 throw new Error(`Gemini API Error: ${data.error.message}`);
+            }
+            // Validate successful response structure
+            if (!data.candidates || !Array.isArray(data.candidates) || data.candidates.length === 0 ||
+                !data.candidates[0].content || !Array.isArray(data.candidates[0].content.parts) ||
+                data.candidates[0].content.parts.length === 0 || typeof data.candidates[0].content.parts[0].text !== 'string') {
+                console.error('Неожиданная структура ответа Gemini:', data);
+                throw new Error('Неожиданная структура ответа от Gemini API.');
+            }
+
+            return data; // Return the full parsed data object
         } catch (error) {
-            console.error('Ошибка запроса:', error);
+            console.error('Ошибка запроса Gemini:', error);
             throw error;
         }
     }
 
     async loadPrompt(psychId) {
         try {
-            console.log(`Загрузка промпта для психолога ${psychId}...`);
+            // console.log(`Загрузка промпта для психолога ${psychId}...`); // Removed for cleaner logs
             const promptPath = `prompts/${psychId}.txt`;
-            console.log('Путь к файлу промпта:', promptPath);
+            // console.log('Путь к файлу промпта:', promptPath); // Removed for cleaner logs
 
             const response = await fetch(promptPath);
             if (!response.ok) {
@@ -80,7 +129,7 @@ class API {
                 return this.defaultPrompt;
             }
 
-            console.log(`Промпт для ${psychId} успешно загружен (${text.length} символов)`);
+            // console.log(`Промпт для ${psychId} успешно загружен (${text.length} символов)`); // Removed for cleaner logs
             return text.trim();
         } catch (error) {
             console.error(`Ошибка загрузки промпта для ${psychId}:`, error);
@@ -92,29 +141,45 @@ class API {
     // Added loadConfig method
     async loadConfig() {
         try {
-            console.log('Загрузка конфигурации приложения (config.json)...');
-            const response = await fetch('config.json');
+            // console.log('Загрузка конфигурации приложения (config.json)...'); // Removed for cleaner logs
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 секунд таймаут
+
+            const response = await fetch('config.json', { signal: controller.signal });
+
+            clearTimeout(timeoutId);
+
             if (!response.ok) {
                 throw new Error(`Не удалось загрузить config.json: статус ${response.status}`);
             }
-            const config = await response.json();
-            console.log('Конфигурация успешно загружена:', config);
-            // Basic validation
-            if (!config || !Array.isArray(config.psychologists)) {
-                 throw new Error('Некорректный формат config.json: отсутствует массив psychologists.');
+            let config;
+            try {
+                 // console.log('[API] Попытка парсинга JSON из config.json...'); // Removed for cleaner logs
+                 config = await response.json();
+                 // console.log('[API] JSON успешно распарсен.'); // Removed for cleaner logs
+            } catch (jsonError) {
+                 console.error('[API] Ошибка парсинга JSON в config.json:', jsonError);
+                 throw new Error(`Ошибка парсинга config.json: ${jsonError.message}`);
             }
+            // console.log('Конфигурация успешно загружена.'); // Removed for cleaner logs
+            // Basic validation
+            if (!config || !config.apiKey || !Array.isArray(config.psychologists)) {
+                 throw new Error('Некорректный формат config.json: отсутствует apiKey или массив psychologists.');
+            }
+            this.apiKey = config.apiKey; // Store the API key
+            console.log('API Key загружен.'); // Keep this one as it's important
             return config;
         } catch (error) {
             console.error('Ошибка загрузки конфигурации:', error);
-            // Re-throw the error so the caller (app.js) can handle it
-            throw new Error(`Ошибка загрузки config.json: ${error.message}`);
+            throw new Error(`Ошибка загрузки config.json: ${error.message}${error.name === 'AbortError' ? ' (Таймаут)' : ''}`);
         }
     }
 
 
     async testConnection() {
         try {
-            console.log('Тестирование подключения к серверу модели...'); // Note: This tests the Gemini API, not config loading.
+            console.log('Тестирование подключения к серверу модели...');
             const messages = [
                 {
                     role: "system",
@@ -125,92 +190,82 @@ class API {
                     content: "Hello"
                 }
             ];
+             const testMessagesForApi = [ { role: 'user', content: 'Hello' } ];
+            const data = await this.makeRequest(testMessagesForApi);
 
-            const data = await this.makeRequest(messages);
-            return data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+            // Check the specific Gemini response structure
+            return data.candidates[0].content.parts[0].text;
         } catch (error) {
-            console.error('Ошибка подключения к серверу модели:', error);
+            console.error('Ошибка подключения к Gemini API:', error);
             return false;
         }
     }
 
-    async getAIResponse(selectedPsych, message) {
+    async getAIResponse(selectedPsych, message, history = []) { // Added history parameter
         try {
-            console.log('Получение ответа для психолога:', selectedPsych);
+            // console.log('Получение ответа для психолога:', selectedPsych); // Removed for cleaner logs
 
-            // Добавляем проверку на пустой message
             if (!message || typeof message !== 'string' || message.trim().length === 0) {
                 throw new Error('Сообщение пользователя не может быть пустым');
             }
 
             const systemPrompt = await this.loadPrompt(selectedPsych);
-            console.log('Загруженный системный промпт:', systemPrompt);
+            // console.log('Загруженный системный промпт:', systemPrompt); // Removed for cleaner logs
 
-            // Валидация промпта
             if (!systemPrompt || systemPrompt.trim().length === 0) {
                 throw new Error('Системный промпт не может быть пустым');
             }
 
+            // Construct messages including history
             const messages = [
-                {
-                    role: "system",
-                    content: systemPrompt.trim() // Добавляем trim
-                },
-                {
-                    role: "user",
-                    content: message.trim() // Добавляем trim
-                }
+                { role: "system", content: systemPrompt.trim() },
+                ...history, // Add history messages here
+                { role: "user", content: message.trim() }
             ];
 
-            // Явная валидация структуры
-            this.validateMessages(messages);
+            // Validate the final structure before sending
+            this.validateInternalMessages(messages);
 
             const data = await this.makeRequest(messages);
 
-            // Улучшенная проверка ответа
-            if (!data || typeof data !== 'object') {
-                throw new Error('Получен некорректный ответ от сервера');
-            }
+            const responseText = data.candidates[0].content.parts[0].text;
 
-            if (!Array.isArray(data.choices) || data.choices.length === 0) {
-                throw new Error('Сервер вернул пустой список вариантов ответа');
-            }
+            // console.log("Получен ответ от Gemini:", responseText); // Removed for cleaner logs
+            return responseText;
 
-            const firstChoice = data.choices[0];
-            if (!firstChoice.message || typeof firstChoice.message.content !== 'string') {
-                throw new Error('Некорректный формат ответа от сервера');
-            }
-
-            return data;
         } catch (error) {
-            console.error('Ошибка при получении ответа от API:', error);
+            console.error('Ошибка при получении ответа от Gemini API:', error);
+            console.error('Stack trace:', error.stack);
 
-            // Формируем понятное пользователю сообщение об ошибке
-            let userMessage = 'Произошла ошибка при получении ответа. ';
+            let userMessage = 'Произошла ошибка при получении ответа от ИИ. ';
 
-            if (error.message.includes('Failed to fetch')) {
-                userMessage += 'Сервер модели недоступен. Убедитесь, что он запущен на localhost:1234';
-            } else if (error.message.includes('API Gemini')) {
-                 // Ошибки, которые мы сами сгенерировали на основе ответа API
-                 userMessage += error.message;
-            } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
-                 userMessage += 'Проблема с сетью или CORS. Проверьте подключение и настройки сервера.';
+            if (error.message.includes('API key not loaded')) {
+                userMessage += 'Ключ API не загружен. Проверьте config.json и перезагрузите страницу.';
+            } else if (error.message.includes('HTTP error') || error.message.includes('Gemini API Error')) {
+                userMessage += `Ошибка сервера: ${error.message}`;
+            } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                userMessage += 'Проблема с сетью. Проверьте ваше интернет-соединение.';
+            } else if (error.message.includes('Неожиданная структура ответа')) {
+                 userMessage += 'Получен некорректный ответ от сервера ИИ.';
             } else {
-                 // Другие общие ошибки
-                 userMessage += `Неизвестная ошибка: ${error.message}`;
+                userMessage += `Детали: ${error.message}`;
             }
 
-            // Перебрасываем ошибку с user-friendly сообщением
             throw new Error(userMessage);
         }
     }
 }
 
 // Инициализация API при загрузке скрипта
-if (!window.api) {
-    console.log('Создание экземпляра API...');
-    window.api = new API();
-    console.log('Экземпляр API создан и доступен как window.api');
-} else {
-    console.log('Экземпляр API уже существует.');
+try {
+    if (!window.api) {
+        // console.log('Создание экземпляра API...'); // Removed for cleaner logs
+        window.api = new API();
+        console.log('Экземпляр API создан и доступен как window.api'); // Keep this one
+    } else {
+        // console.log('Экземпляр API уже существует.'); // Removed for cleaner logs
+    }
+} catch (apiInitError) {
+    console.error('КРИТИЧЕСКАЯ ОШИБКА при создании экземпляра API:', apiInitError);
+    alert('Критическая ошибка при инициализации API: ' + apiInitError.message);
 }

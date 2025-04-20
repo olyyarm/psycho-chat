@@ -43,7 +43,7 @@ start "PsychoChat Server" cmd /k "python -m http.server 8000"
 :: Ожидание запуска сервера
 timeout /t 2 >nul
 
-:: Открытие браузера
+:: Открытие браузера, закрыт
 echo.
 echo Открываю приложение в браузере...
 start http://localhost:8000/index.html
